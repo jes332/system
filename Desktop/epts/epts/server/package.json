@@ -1,0 +1,7 @@
+{
+  "name": "epts-server",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node --watch index.js", "start": "node index.js", "seed": "node seed.js" },
+  "dependencies": { "bcryptjs": "^2.4.3", "express": "^4.19.2", "jsonwebtoken": "^9.0.2", "mysql2": "^3.11.0" }
+}
