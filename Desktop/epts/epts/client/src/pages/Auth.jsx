@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { api, setToken } from "../api";
+import { Brand, Btn, FormMsg } from "../components/ui";
 
 export default function Auth({ onLogin }) {
   const [mode, setMode] = useState("in"),
     [f, setF] = useState({ email: "", password: "" });
   const [show, setShow] = useState(false),
+    [busy, setBusy] = useState(false),
     [err, setErr] = useState(""),
     [ok, setOk] = useState("");
   const up = (k) => (e) => {
@@ -18,14 +20,17 @@ export default function Auth({ onLogin }) {
   };
   const submit = async (e) => {
     e.preventDefault();
+    if (busy) return;
     setErr("");
     setOk("");
+    setBusy(true);
     try {
       if (mode === "up") {
         const j = await api("/register", "POST", f);
         setOk(j.message);
         setMode("in");
         setF({ email: f.email, password: "" });
+        setBusy(false);
       } else {
         const j = await api("/login", "POST", f);
         setToken(j.token);
@@ -33,15 +38,14 @@ export default function Auth({ onLogin }) {
       }
     } catch (x) {
       setErr(x.message);
+      setBusy(false);
     }
   };
   return (
     <div className="auth">
       <section className="auth-side">
-        <div className="brand big">
-          EPTS<small>Employee Productivity Tracking System</small>
-        </div>
-        <h2>Weekly reports in minutes, reviewed in one place.</h2>
+        <Brand big />
+        <p className="auth-lead">Weekly reports in minutes, reviewed in one place.</p>
         <ul>
           <li>Employees report their week in a few minutes.</li>
           <li>Managers review and approve each report.</li>
@@ -58,11 +62,7 @@ export default function Auth({ onLogin }) {
               Your manager will approve your account before you can sign in.
             </p>
           )}
-          {ok && (
-            <p className="ok" role="status">
-              {ok}
-            </p>
-          )}
+          <FormMsg ok={ok} />
           <label htmlFor="em">Work email</label>
           <input
             id="em"
@@ -87,20 +87,22 @@ export default function Auth({ onLogin }) {
             <button
               type="button"
               className="link"
+              aria-pressed={show}
               onClick={() => setShow(!show)}
             >
               {show ? "Hide" : "Show"}
             </button>
           </div>
           {mode === "up" && <p className="hint">Use at least 8 characters.</p>}
-          {err && (
-            <p className="err" role="alert">
-              {err}
-            </p>
-          )}
-          <button className="btn full">
+          <FormMsg err={err} />
+          <Btn
+            type="submit"
+            className="full"
+            busy={busy}
+            busyText={mode === "in" ? "Signing in…" : "Creating account…"}
+          >
             {mode === "in" ? "Sign in" : "Create account"}
-          </button>
+          </Btn>
           <p className="switch">
             {mode === "in" ? "New employee? " : "Already have an account? "}
             <button type="button" className="link" onClick={flip}>
@@ -115,14 +117,18 @@ export default function Auth({ onLogin }) {
 
 export function NameSetup({ onDone, onOut }) {
   const [n, setN] = useState(""),
+    [busy, setBusy] = useState(false),
     [err, setErr] = useState("");
   const save = async (e) => {
     e.preventDefault();
+    if (busy) return;
+    setBusy(true);
     try {
       const j = await api("/me", "PUT", { full_name: n });
       onDone(j.full_name);
     } catch (x) {
       setErr(x.message);
+      setBusy(false);
     }
   };
   return (
@@ -142,12 +148,10 @@ export function NameSetup({ onDone, onOut }) {
           }}
           autoFocus
         />
-        {err && (
-          <p className="err" role="alert">
-            {err}
-          </p>
-        )}
-        <button className="btn full">Continue</button>
+        <FormMsg err={err} />
+        <Btn type="submit" className="full" busy={busy} busyText="Saving…">
+          Continue
+        </Btn>
         <p className="switch">
           <button type="button" className="link" onClick={onOut}>
             Sign out

@@ -2,8 +2,12 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import db, { monday } from "./db.js";
 
+// The JWT signing secret can be set in the environment (JWT_SECRET). The old demo value stays
+// as the fallback so the current XAMPP setup keeps working without any extra step.
 const app = express(),
-  SECRET = "epts-demo-secret";
+  SECRET = process.env.JWT_SECRET || "epts-demo-secret";
+if (!process.env.JWT_SECRET)
+  console.warn("JWT_SECRET is not set. Using the demo secret (fine for local XAMPP use only).");
 app.use(express.json());
 
 // ---------- helpers ----------
@@ -142,11 +146,15 @@ app.put(
   "/api/users/:id/approve",
   auth("manager"),
   h(async (q, r) => {
-    await db.query(
-      "UPDATE users SET status='active' WHERE id=? AND role='employee'",
+    const [x] = await db.query(
+      "UPDATE users SET status='active' WHERE id=? AND role='employee' AND status='pending'",
       [q.params.id],
     );
-    r.json({ ok: true });
+    x.affectedRows
+      ? r.json({ ok: true })
+      : r
+          .status(409)
+          .json({ error: "This account is no longer waiting for approval." });
   }),
 );
 // EDIT + UPDATE: the manager changes name, email and status of one employee
@@ -202,7 +210,9 @@ const R = {
   assigned: "r.tasks_assigned",
   completed: "r.tasks_completed",
   rate: "rate",
-  status: "r.status",
+  // ENUM columns sort by their position in the list, not alphabetically. FIELD() puts the
+  // reports that need review first when sorted ascending.
+  status: "FIELD(r.status, 'submitted', 'approved', 'draft')",
 };
 const SELECT = `SELECT r.id, r.user_id, COALESCE(u.full_name, u.email) AS person, r.week_start, r.hours, r.tasks_assigned, r.tasks_completed,
   ROUND(r.tasks_completed / r.tasks_assigned * 100, 1) AS rate, r.status, r.notes
@@ -291,22 +301,30 @@ app.put(
   "/api/records/:id/approve",
   auth("manager"),
   h(async (q, r) => {
-    await db.query(
+    const [x] = await db.query(
       "UPDATE weekly_records SET status='approved' WHERE id=? AND status='submitted'",
       [q.params.id],
     );
-    r.json({ ok: true });
+    x.affectedRows
+      ? r.json({ ok: true })
+      : r
+          .status(409)
+          .json({ error: "This report is no longer waiting for review." });
   }),
 );
 app.delete(
   "/api/records/:id",
   auth("employee"),
   h(async (q, r) => {
-    await db.query(
+    const [x] = await db.query(
       "DELETE FROM weekly_records WHERE id=? AND user_id=? AND status='draft'",
       [q.params.id, q.user.id],
     );
-    r.json({ ok: true });
+    x.affectedRows
+      ? r.json({ ok: true })
+      : r
+          .status(404)
+          .json({ error: "That draft no longer exists or was already sent." });
   }),
 );
 

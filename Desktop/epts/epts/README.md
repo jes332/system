@@ -23,3 +23,12 @@ Full-stack prototype: React (client) + Node.js/Express (server) + MySQL (XAMPP).
 - `server/db.js` MySQL connection
 - `server/seed.js` creates the tables and sample data
 - `client/src/` pages (Auth, Employee, Manager), SortTable, Trend, styles.css
+
+## Optional: JWT secret from the environment
+
+The server uses `JWT_SECRET` if it is set, and the old demo secret if not (so nothing changes for the XAMPP setup).
+To set it: copy `server/.env.example` to `server/.env`, then start the server with `node --env-file=.env index.js` (Node 20.6+).
+
+## What changed in the UI/UX pass
+
+See `IMPROVEMENTS.md` for the full list, the files changed, what was not implemented, and the tests run.
