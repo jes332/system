@@ -1,0 +1,61 @@
+/*
+  EPTS design tokens. Every value in styles.css comes from here.
+  Rules (also in /DESIGN.md):
+  - Color: navy = structure, teal = data, orange = the one action on screen. Nothing else.
+  - Space: 4px scale only. Related things sit close, groups sit far apart.
+  - Type: 5 sizes. Numbers always use tabular figures.
+  - Radius: a nested corner = outer radius minus the padding between them.
+*/
+:root {
+  /* color */
+  --pri: #1f4e79;
+  --sec: #3a8a8a; /* 4.1:1 on white, enough for charts and bars */
+  --acc: #e8741c; /* action buttons, active nav marker */
+  --acc-ink: #9a3f06; /* accent for text; 6.8:1 on white */
+  --sec-ink: #25696a; /* teal for small text; 6.4:1 on white (--sec is for charts and bars only) */
+
+  /* semantic states. Always shown with a text label and an icon, never color alone */
+  --ok-ink: #17602f; /* success text, 6.7:1 on --ok-bg */
+  --ok-bg: #e4f3e8;
+  --warn-ink: #6f3d00; /* needs attention (waiting for someone), 7.7:1 on --warn-bg */
+  --warn-bg: #fdecc8;
+  --danger-ink: #a11d1d; /* errors and destructive actions, 7.8:1 on white */
+  --danger-bg: #fdeaea;
+  --ctl-line: #738090; /* border of inputs and outline buttons, 3.9:1 on white */
+  --bg: #f4f6f8;
+  --card: #fff;
+  --ink: #1e2733;
+  --muted: color-mix(
+    in srgb,
+    var(--ink) 78%,
+    white
+  ); /* 7.3:1 on white, 6.7:1 on --bg */
+  --line: color-mix(in srgb, var(--ink) 12%, white);
+
+  /* space (4px scale) */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+  --s8: 64px;
+
+  /* type */
+  --t-sm: 0.875rem; /* 14: labels, table headers, hints */
+  --t-md: 1rem; /* 16: body */
+  --t-lg: 1.25rem; /* 20: card headings */
+  --t-xl: clamp(1.5rem, 3.2vw, 2rem); /* 24-32: page headline */
+  --t-hero: clamp(2.5rem, 6vw, 3.5rem); /* 40-56: the one number that matters */
+
+  /* radius */
+  --r-card: 16px;
+  --pad-card: var(--s5);
+  --r-ctl: 10px; /* inputs and buttons */
+  --r-pill: 999px;
+  --bar-pad: 3px;
+  --r-bar: 8px;
+  /* nested corner = outer radius - padding (never below 2px) */
+  --r-bar-fill: max(calc(var(--r-bar) - var(--bar-pad)), 2px);
+}
